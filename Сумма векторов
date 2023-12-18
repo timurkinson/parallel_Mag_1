@@ -1,0 +1,73 @@
+#include <iostream>
+#include <thread>
+#include <vector>
+
+using namespace std;
+
+vector<int> fill_vec_with_rand_numb(vector<int> v)
+{
+	int i;
+	for (i = 0; i < v.size(); i++)
+	{
+		v[i] = -5 + rand()%10;
+	}
+	return v;
+}
+
+void vector_output(vector<int> v)
+{
+	int i;
+	for (i = 0; i < v.size(); i++)
+	{
+		cout << v[i];
+		cout << " ";
+	}
+	cout << endl;
+}
+
+void sum_elements_2(vector<int> v1, vector<int> v2, int start, vector<int> &v_out)
+{
+	int i = start;
+	while (i < v1.size())
+	{	
+		/*cout << start << "Thread ID: " << this_thread::get_id << endl; */
+		v_out[i] = v1[i] + v2[i];
+		i += 2;
+	}
+}
+
+vector<int> sum_vecs(vector<int> v1, vector<int> v2)
+{
+	int i = 0;
+	vector<int> v3(v1.size());
+	thread th1(sum_elements_2, v1, v2, i, ref(v3));
+	thread th2(sum_elements_2, v1, v2, i + 1, ref(v3));
+	th1.join();
+	th2.join();
+	return v3;
+	/*vector<int> indexes(thread_num);
+	for (i = 0; i < thread_num; i++)
+	{
+		indexes[i] = i;
+	}
+	*/
+	
+
+}
+
+int main()
+{
+	int n = 5;
+	vector<int> v1(n);
+	v1 = fill_vec_with_rand_numb(v1);
+	vector<int> v2(n);
+	v2 = fill_vec_with_rand_numb(v2);
+	vector_output(v1);
+	vector_output(v2);
+
+	vector<int> v3(n);
+	v3 = sum_vecs(v1, v2);
+	vector_output(v3);
+
+	return 0;
+}
