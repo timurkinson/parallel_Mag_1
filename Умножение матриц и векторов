@@ -1,0 +1,117 @@
+#include <iostream>
+#include <thread>
+#include <vector>
+
+using namespace std;
+
+vector<int> fill_vec_with_rand_numb(vector<int> v)
+{
+	int i;
+	for (i = 0; i < v.size(); i++)
+	{
+		v[i] = -5 + rand() % 10;
+	}
+	return v;
+}
+
+void matrix_get(int m, int n, vector<vector<int>> &M_out)
+{
+	M_out.resize(n);
+	for (int i = 0; i < n; i++)
+	{
+		M_out[i].resize(m);
+		M_out[i] = fill_vec_with_rand_numb(M_out[i]);
+	}
+}
+
+void matrix_resize(int m, int n, vector<vector<int>>& M_out)
+{
+	M_out.resize(n);
+	for (int i = 0; i < n; i++)
+	{
+		M_out[i].resize(m);
+	}
+}
+
+void matrix_output(vector<vector<int>> M)
+{
+	int i, j;
+	for (i = 0; i < M.size(); i++)
+	{
+		for (j = 0; j < M[i].size(); j++)
+		{
+			cout << M[i][j] << "	";
+		}
+		cout << endl;
+	}
+	cout << endl;
+}
+/*
+void matrix_mult(vector<vector<int>> M1, vector<vector<int>> M2, vector<vector<int>>& M_out)
+{
+	if (M1.size() == M2[0].size())
+	{
+		matrix_resize(M1[0].size(), M2.size(), M_out);
+		for (int i = 0; i < M1[0].size(); i++)
+		{
+			for (int j = 0; j < M2.size(); j++)
+			{
+				for (int k = 0; k < M1.size(); k++)
+				{
+					M_out[i][j] = M_out[i][j] + M1[k][i] * M2[j][k];
+				}
+			}
+		}
+	}
+	else
+		std::cout << "Mistake! Different sizes" << std::endl;
+}
+*/
+
+void matrix_mult_single(vector<vector<int>> M1, vector<vector<int>> M2, vector<vector<int>>& M_out, int start)
+{
+		int i = start;
+		while (i < M1[0].size())
+		{
+			for (int j = 0; j < M2.size(); j++)
+			{
+				for (int k = 0; k < M1.size(); k++)
+				{
+					M_out[i][j] = M_out[i][j] + M1[k][i] * M2[j][k];
+				}
+			}
+			i += 2;
+		}
+}
+
+void matrix_mult_par(vector<vector<int>> M1, vector<vector<int>> M2, vector<vector<int>>& M_out)
+{
+	if (M1.size() == M2[0].size())
+	{
+		matrix_resize(M1[0].size(), M2.size(), M_out);
+		thread th1(matrix_mult_single, M1, M2, ref(M_out), 0);
+		thread th2(matrix_mult_single, M1, M2, ref(M_out), 1);
+		th1.join();
+		th2.join();
+	}
+	else
+		std::cout << "Mistake! Different sizes" << std::endl;
+}
+
+int main()
+{
+	int n = 5;
+	int m = 3;
+	vector<vector<int>> M1;
+	vector<vector<int>> M2;
+	vector<vector<int>> M3;
+	matrix_get(m, n, M1);
+	matrix_get(n, m, M2);
+	matrix_get(n, m, M3);
+	matrix_output(M1);
+	matrix_output(M2);
+  /*matrix_mult(M1, M2, M3);*/
+	matrix_mult_par(M1, M2, M3);
+	matrix_output(M3);
+	return 0;
+}
